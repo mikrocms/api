@@ -1,0 +1,31 @@
+{
+  "name": "@mikrocms/api",
+  "version": "1.0.0",
+  "description": "Package api mikrocms",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikrocms/api.git"
+  },
+  "keywords": [
+    "mikrocms"
+  ],
+  "author": "mikrocms",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikrocms/api/issues"
+  },
+  "homepage": "https://github.com/mikrocms/api#readme",
+  "dependencies": {
+    "@mikrocms/core": "^1.0.0",
+    "@mikrocms/swagger": "^1.0.0",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "express-validator": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "sequelize": "^6.37.3"
+  }
+}
