@@ -1,0 +1,891 @@
+openapi: '3.0.2'
+
+info:
+  title: mikrocms api
+  version: '0.0.0'
+  contact:
+    name: Musa Sutisna
+    email: mus4.sutisn4@gmail.com
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development Server
+
+components:
+  securitySchemes:
+    Authorization:
+      type: http
+      scheme: bearer
+  schemas:
+    profile:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        fullname:
+          type: string
+        updated_at:
+          type: string
+        role_id:
+          type: integer
+        role_name:
+          type: string
+        redirect:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              permission_id:
+                type: integer
+              permission_name:
+                type: string
+              permission_description:
+                type: string
+    role:
+      type: object
+      properties:
+        id:
+          type: integer
+        role_name:
+          type: string
+        redirect:
+          type: string
+    role_permission:
+      type: object
+      properties:
+        id:
+          type: integer
+        permission_id:
+          type: integer
+        permission_name:
+          type: string
+        permission_description:
+          type: string
+    permission:
+      type: object
+      properties:
+        id:
+          type: integer
+        permission_name:
+          type: string
+        permission_description:
+          type: string
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        username:
+          type: string
+        fullname:
+          type: string
+        updated_at:
+          type: string
+        role_id:
+          type: integer
+        role_name:
+          type: string
+
+paths:
+  /login:
+    post:
+      tags:
+        - auth
+      description: 'Create user authentication'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: admin
+                password:
+                  type: string
+                  example: admin
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: 'Success create a user authentication'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  token:
+                    type: string
+                    description: 'The authentication token'
+                  redirect:
+                    type: string
+                    description: 'The URL to redirect to after authentication'
+  /recovery:
+    post:
+      tags:
+        - auth
+      description: 'Recovery user access'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+              required:
+                - username
+      responses:
+        '200':
+          description: 'Success recovery user access'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+  /u/logout:
+    post:
+      tags:
+        - auth
+      description: 'Remove current user authentication'
+      responses:
+        '200':
+          description: 'Success remove current user authentication'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/profile:
+    get:
+      tags:
+        - user
+      description: 'Get current user profile information'
+      responses:
+        '200':
+          description: 'Success get current user profile information'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  user:
+                    $ref: '#/components/schemas/profile'
+      security:
+        - Authorization: ['{{token}}']
+  /u/profile/photo:
+    post:
+      tags:
+        - user
+      description: 'Upload current user photo profile'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+              required:
+                - photo
+      responses:
+        '200':
+          description: 'Success upload current user photo profile'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/profile/password:
+    post:
+      tags:
+        - user
+      description: 'Change current user password'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                password_old:
+                  type: string
+                password_new:
+                  type: string
+              required:
+                - password_old
+                - password_new
+      responses:
+        '200':
+          description: 'Success change current user password'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/roles:
+    get:
+      tags:
+        - user
+      description: 'Get list of user role'
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: 'page offset'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: 'page limit'
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: 'data sorting ASC or DESC'
+        - name: created_at_on
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: created_at_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: created_at_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: created_by
+          in: query
+          schema:
+            type: string
+          description: 'User ID of the user who created user data'
+        - name: updated_at_on
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: updated_at_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: updated_at_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: updated_by
+          in: query
+          schema:
+            type: string
+          description: 'User ID of the user who updated user data'
+        - name: deleted_at_on
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: deleted_at_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: deleted_at_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: deleted_by
+          in: query
+          schema:
+            type: string
+          description: 'User ID of the user who deleted user data'
+        - name: role_name
+          in: query
+          schema:
+            type: string
+          description: 'The name of the role'
+        - name: redirect
+          in: query
+          schema:
+            type: string
+          description: 'The URL to redirect to after authentication'
+      responses:
+        '200':
+          description: 'Success get list of user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/role'
+      security:
+        - Authorization: ['{{token}}']
+  /u/role:
+    post:
+      tags:
+        - user
+      description: 'Add a new user role'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                role_name:
+                  type: string
+                redirect:
+                  type: string
+              required:
+                - role_name
+                - redirect
+      responses:
+        '200':
+          description: 'Success add a new user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  role_id:
+                    type: integer
+                    description: 'ID of the newly created role'
+      security:
+        - Authorization: ['{{token}}']
+    put:
+      tags:
+        - user
+      description: 'Update selected user role'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                role_name:
+                  type: string
+                redirect:
+                  type: string
+              required:
+                - id
+      responses:
+        '200':
+          description: 'Success update selected user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/role/{roleId}:
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Selected user role id
+    get:
+      tags:
+        - user
+      description: 'Get detail of selected user role'
+      responses:
+        '200':
+          description: 'Success get detail of selected user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  role:
+                    $ref: '#/components/schemas/role'
+                  permissions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/role_permission'
+      security:
+        - Authorization: ['{{token}}']
+    delete:
+      tags:
+        - user
+      description: 'Delete selected user role'
+      responses:
+        '200':
+          description: 'Success delete selected user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/permissions:
+    get:
+      tags:
+        - user
+      description: 'Get list of permission'
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: page offset
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: page limit
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: 'data sorting ASC or DESC'
+        - name: permission_name
+          in: query
+          schema:
+            type: string
+          description: 'role permission name'
+        - name: permission_description
+          in: query
+          schema:
+            type: string
+          description: 'role permission description'
+      responses:
+        '200':
+          description: 'Success get list of permission'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  permissions:
+                    type: array
+                    items:
+                      type: object
+                      $ref: '#/components/schemas/permission'
+      security:
+        - Authorization: ['{{token}}']
+  /u/role-permission:
+    post:
+      tags:
+        - user
+      description: 'Add a permission to selected user role'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                role_id:
+                  type: integer
+                permission_id:
+                  type: integer
+              required:
+                - role_id
+                - permission_id
+      responses:
+        '200':
+          description: 'Success add a permission to selected user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  role_permission_id:
+                    type: integer
+                    description: 'ID of the newly created role permission'
+      security:
+        - Authorization: ['{{token}}']
+  /u/role-permission/{rolePermissionId}:
+    parameters:
+      - name: rolePermissionId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Selected role permission id'
+    delete:
+      tags:
+        - user
+      description: 'Delete selected role permission'
+      responses:
+        '200':
+          description: 'Success delete selected user role'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/users:
+    get:
+      tags:
+        - user
+      description: 'Get list of user'
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: 'page offset'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: 'page limit'
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: 'data sorting ASC or DESC'
+        - name: created_at_on
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: created_at_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: created_at_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: created_by
+          in: query
+          schema:
+            type: string
+          description: 'User ID of the user who created user data'
+        - name: updated_at_on
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: updated_at_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: updated_at_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: updated_by
+          in: query
+          schema:
+            type: string
+          description: 'User ID of the user who updated user data'
+        - name: deleted_at_on
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: deleted_at_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: deleted_at_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 'The date in ISO 8601 format'
+        - name: deleted_by
+          in: query
+          schema:
+            type: string
+          description: 'User ID of the user who deleted user data'
+        - name: user_email
+          in: query
+          schema:
+            type: string
+          description: 'user email'
+        - name: user_username
+          in: query
+          schema:
+            type: string
+          description: 'user username'
+        - name: user_fullname
+          in: query
+          schema:
+            type: string
+          description: 'user fullname'
+      responses:
+        '200':
+          description: 'Success get list of user'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user'
+      security:
+        - Authorization: ['{{token}}']
+  /u/user:
+    post:
+      tags:
+        - user
+      description: 'Create a new user'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+                fullname:
+                  type: string
+                role_id:
+                  type: integer
+              required:
+                - email
+                - username
+                - password
+                - fullname
+                - role_id
+      responses:
+        '200':
+          description: 'Success add a new user'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+                  user_id:
+                    type: integer
+                    description: 'ID of the newly created user'
+      security:
+        - Authorization: ['{{token}}']
+    put:
+      tags:
+        - user
+      description: 'Update selected user'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                email:
+                  type: string
+                username:
+                  type: string
+                fullname:
+                  type: string
+                role_id:
+                  type: integer
+              required:
+                - id
+                - email
+                - username
+                - password
+                - fullname
+                - role_id
+      responses:
+        '200':
+          description: 'Success update selected user'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: 'Status code of the operation (e.g., 200, 400, etc)'
+                  message:
+                    type: string
+                    description: 'Details or message about the result'
+      security:
+        - Authorization: ['{{token}}']
+  /u/user/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Selected user id
+    get:
+      tags:
+        - user
+      description: 'Get detail information of selected user'
+      responses:
+        '200':
+          description: 'Success get detail information of selected user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+      security:
+        - Authorization: ['{{token}}']
+    delete:
+      tags:
+        - user
+      description: 'Delete selected user'
+      responses:
+        '200':
+          description: 'Success delete selected user'
+      security:
+        - Authorization: ['{{token}}']
