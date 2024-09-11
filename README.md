@@ -52,6 +52,8 @@ API is default module supported common api to handle some mechanisme process: au
 | session | `add`, `select`, `list`, `update`, `remove` |
 | user | `add`, `select`, `list`, `update`, `remove` |
 
+<br/>
+
 | Name | Relation |
 |:--|:--|
 | role_permission | *roled*(`belongsTo`:`Role`), *permission*(`belongsTo`:`Permission`) |
@@ -76,6 +78,7 @@ API is default module supported common api to handle some mechanisme process: au
 ## Router
 
 | Name | Middleware | Description |
+|:--|:--|:--|
 | /api/v1 | `cors` | Handles all requests for API version 1. |
 | /api/v1/u | `cors`, `auth` | Handles all requests for API version 1 that require authentication. |
 
