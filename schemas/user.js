@@ -1,4 +1,4 @@
-module.exports = function (DataTypes) {
+module.exports = function ({ DataTypes }) {
   return {
     attributes: {
       'user_id': {
