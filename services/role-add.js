@@ -69,7 +69,7 @@ module.exports = function ({ model, locale }) {
     body('redirect')
       .exists({ checkFalsy: true })
       .withMessage('mikrocms@api_input_role_redirect_required')
-      .isLength({ min: 3, max: 512 })
+      .isLength({ min: 1, max: 512 })
       .withMessage('mikrocms@api_input_role_redirect_limit'),
     handlerAddRole
   ];
