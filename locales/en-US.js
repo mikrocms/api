@@ -29,6 +29,8 @@ module.exports = {
   'mikrocms@api_input_role_name_required': 'Role name is required. Please enter your role name.',
   'mikrocms@api_input_role_name_format': 'Role name must be alphanumeric and can include underscores and hyphens.',
   'mikrocms@api_input_role_name_limit': 'Role name length must be between 3 and 256 characters.',
+  'mikrocms@api_input_role_redirect_required': 'Role redirect is required. Please enter your role redirect.',
+  'mikrocms@api_input_role_redirect_limit': 'Role redirect length must be between 1 and 512 characters',
   'mikrocms@api_input_role_id_required': 'Role id is required. Please enter your role id.',
   'mikrocms@api_input_role_id_format': 'Role id must be numeric.',
   'mikrocms@api_input_permission_id_required': 'Permission id is required. Please enter your permission id.',

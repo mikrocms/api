@@ -88,7 +88,7 @@ module.exports = function ({ model, locale }) {
       .withMessage('mikrocms@api_input_role_name_limit'),
     body('redirect')
       .optional({ checkFalsy: true })
-      .isLength({ min: 3, max: 512 })
+      .isLength({ min: 1, max: 512 })
       .withMessage('mikrocms@api_input_role_redirect_limit'),
     handlerEditRole
   ];
