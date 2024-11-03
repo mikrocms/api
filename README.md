@@ -4,8 +4,8 @@ API is default module supported common api to handle some mechanisme process: au
 
 | Specification | version |
 |:--|:--:|
-| mikrocms/core | 1.0.0 |
-| mikrocms/swagger | 1.0.0 |
+| mikrocms/core | 1.1.1 |
+| mikrocms/swagger | 1.0.1 |
 
 
 ### Environment
