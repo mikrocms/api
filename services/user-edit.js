@@ -1,9 +1,19 @@
 const { body, validationResult } = require('express-validator');
 
-module.exports = function ({ model, locale }) {
+module.exports = function ({ model, locale, middleware }) {
   const modelUser = model('user');
   const modelRole = model('role');
   const modelActivityLog = model('activity_log');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'USER': {
+        'permit_update': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerEditUser(req, res) {
     const errors = validationResult(req);
@@ -20,8 +30,10 @@ module.exports = function ({ model, locale }) {
       'message': null
     };
 
-    const selectedUser = await modelUser.select({
-      'user_id': req.body.id
+    const selectedUser = await modelUser.find({
+      queries: {
+        'user_id': { 'eq': req.body.id }
+      }
     });
 
     if (selectedUser === null) {
@@ -35,8 +47,10 @@ module.exports = function ({ model, locale }) {
 
       if (req.body.role_id) {
         if (selectedUser.role_id !== req.body.role_id) {
-          const selectedRole = await modelRole.select({
-            'role_id': req.body.role_id
+          const selectedRole = await modelRole.find({
+            queries: {
+              'role_id': { 'eq': req.body.role_id }
+            }
           });
 
           if (selectedRole !== null) {
@@ -50,8 +64,10 @@ module.exports = function ({ model, locale }) {
 
       if (req.body.email) {
         if (selectedUser.user_email !== req.body.email) {
-          const registeredEmail = await modelUser.select({
-            'user_email': req.body.email
+          const registeredEmail = await modelUser.find({
+            queries: {
+              'user_email': { 'eq': req.body.email }
+            }
           });
 
           if (registeredEmail === null) {
@@ -65,8 +81,10 @@ module.exports = function ({ model, locale }) {
 
       if (req.body.username) {
         if (selectedUser.user_username !== req.body.username) {
-          const registeredUser = await modelUser.select({
-            'user_username': req.body.username
+          const registeredUser = await modelUser.find({
+            queries: {
+              'user_username': { 'eq': req.body.username }
+            }
           });
 
           if (registeredUser === null) {
@@ -107,6 +125,8 @@ module.exports = function ({ model, locale }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     body('id')
       .exists({ checkFalsy: true })
       .withMessage('mikrocms@api_input_user_id_required')

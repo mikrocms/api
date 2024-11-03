@@ -1,8 +1,18 @@
 const { query, validationResult } = require('express-validator');
 const mockPermission = require('./mock/permission');
 
-module.exports = function ({ model }) {
+module.exports = function ({ model, middleware }) {
   const modelPermission = model('permission');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'PERMISSION': {
+        'permit_read': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerListPermission(req, res) {
     const errors = validationResult(req);
@@ -21,11 +31,23 @@ module.exports = function ({ model }) {
       'total': 0
     };
 
-    const listPermissions = await modelPermission.list(
-      req.query,
-      req.query.offset,
-      req.query.limit
-    );
+    const queries = {};
+
+    if (req.query.permission_name) {
+      queries['permission_name'] = { 'like': `%${req.query.permission_name}%` };
+    }
+
+    if (req.query.permission_description) {
+      queries['permission_description'] = { 'like': `%${req.query.permission_description}%` };
+    }
+
+    const listPermissions = await modelPermission.find({
+      queries,
+      offset: req.query.offset || null,
+      limit: req.query.limit || null,
+      sort: req.query.sort,
+      method: 'findAndCountAll'
+    });
 
     if (listPermissions) {
       for (var permission of listPermissions.rows) {
@@ -39,6 +61,8 @@ module.exports = function ({ model }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     query('offset')
       .optional()
       .isNumeric()

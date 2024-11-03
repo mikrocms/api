@@ -47,6 +47,14 @@ components:
                 type: string
               permission_description:
                 type: string
+              permit_create:
+                type: string
+              permit_read:
+                type: string
+              permit_update:
+                type: string
+              permit_delete:
+                type: string
     role:
       type: object
       properties:
@@ -66,6 +74,14 @@ components:
         permission_name:
           type: string
         permission_description:
+          type: string
+        permit_create:
+          type: string
+        permit_read:
+          type: string
+        permit_update:
+          type: string
+        permit_delete:
           type: string
     permission:
       type: object
@@ -593,6 +609,22 @@ paths:
                   type: integer
                 permission_id:
                   type: integer
+                permit_create:
+                  type: string
+                  enum: ['DISABLE','ENABLE']
+                  default: 'DISABLE'
+                permit_read:
+                  type: string
+                  enum: ['DISABLE','ENABLE']
+                  default: 'DISABLE'
+                permit_update:
+                  type: string
+                  enum: ['DISABLE','ENABLE']
+                  default: 'DISABLE'
+                permit_delete:
+                  type: string
+                  enum: ['DISABLE','ENABLE']
+                  default: 'DISABLE'
               required:
                 - role_id
                 - permission_id
@@ -840,7 +872,6 @@ paths:
                 - id
                 - email
                 - username
-                - password
                 - fullname
                 - role_id
       responses:

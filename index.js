@@ -5,5 +5,5 @@ module.exports = {
   'middleware': require('./middlewares'),
   'router': require('./routers'),
   'service': require('./services'),
-  'public': require('./publics')
+  'public': require('./publics'),
 };

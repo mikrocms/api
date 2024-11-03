@@ -20,8 +20,10 @@ module.exports = function ({ model }) {
     const token = req.header('Authorization')?.split(' ')[1] || null;
 
     if (token) {
-      const currentSession = await modelSession.select({
-        'session_token': token
+      const currentSession = await modelSession.find({
+        queries: {
+          'session_token': { 'eq': token }
+        }
       });
   
       if (currentSession !== null) {

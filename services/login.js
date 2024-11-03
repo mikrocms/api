@@ -29,8 +29,10 @@ module.exports = function ({ env, model }) {
                       .update(req.body.password)
                       .digest('hex');
 
-    const selectedUser = await modelUser.select({
-      'user_username': username
+    const selectedUser = await modelUser.find({
+      queries: {
+        'user_username': { 'eq': username }
+      }
     });
 
     if (selectedUser) {

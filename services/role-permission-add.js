@@ -1,10 +1,20 @@
 const { body, validationResult } = require('express-validator');
 
-module.exports = function ({ model, locale }) {
+module.exports = function ({ model, locale, middleware }) {
   const modelRole = model('role')
   const modelPermission = model('permission');
   const modelRolePermission = model('role_permission');
   const modelActivityLog = model('activity_log');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'PERMISSION': {
+        'permit_add': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerAddRolePermission(req, res) {
     const errors = validationResult(req);
@@ -22,17 +32,23 @@ module.exports = function ({ model, locale }) {
       'role_permission_id': null
     };
 
-    const selectedRole = await modelRole.select({
-      'role_id': req.body.role_id
+    const selectedRole = await modelRole.find({
+      queries: {
+        'role_id': { 'eq': req.body.role_id }
+      }
     });
 
-    const selectedPermission = await modelPermission.select({
-      'permission_id': req.body.permission_id
+    const selectedPermission = await modelPermission.find({
+      queries: {
+        'permission_id': { 'eq': req.body.permission_id }
+      }
     });
 
-    const registeredPermission = await modelRolePermission.select({
-      'role_id': req.body.role_id,
-      'permission_id': req.body.permission_id
+    const registeredPermission = await modelRolePermission.find({
+      queries: {
+        'role_id': { 'eq': req.body.role_id },
+        'permission_id': { 'eq': req.body.permission_id }
+      }
     });
 
     if (selectedRole === null) {
@@ -45,7 +61,11 @@ module.exports = function ({ model, locale }) {
       const newPermission = {
         'created_by': req.locals.session.user.user_id,
         'role_id': req.body.role_id,
-        'permission_id': req.body.permission_id
+        'permission_id': req.body.permission_id,
+        'permit_create': req.body.permit_create || 'DISABLE',
+        'permit_read': req.body.permit_read || 'DISABLE',
+        'permit_update': req.body.permit_update || 'DISABLE',
+        'permit_delete': req.body.permit_delete || 'DISABLE'
       };
 
       const createdRolePermission = await modelRolePermission.add(newPermission);
@@ -76,6 +96,8 @@ module.exports = function ({ model, locale }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     body('role_id')
       .exists({ checkFalsy: true })
       .withMessage('mikrocms@api_input_role_id_required')
@@ -88,6 +110,24 @@ module.exports = function ({ model, locale }) {
       .isNumeric()
       .withMessage('mikrocms@api_input_permission_id_format')
       .toInt(),
+    body('permission_id')
+      .exists({ checkFalsy: true })
+      .withMessage('mikrocms@api_input_permission_id_required')
+      .isNumeric()
+      .withMessage('mikrocms@api_input_permission_id_format')
+      .toInt(),
+    body('permit_create')
+      .isIn(['ENABLE', 'DISABLE'])
+      .withMessage('mikrocms@api_input_permission_permit_create_format'),
+    body('permit_read')
+      .isIn(['ENABLE', 'DISABLE'])
+      .withMessage('mikrocms@api_input_permission_permit_read_format'),
+    body('permit_update')
+      .isIn(['ENABLE', 'DISABLE'])
+      .withMessage('mikrocms@api_input_permission_permit_update_format'),
+    body('permit_delete')
+      .isIn(['ENABLE', 'DISABLE'])
+      .withMessage('mikrocms@api_input_permission_permit_delete_format'),
     handlerAddRolePermission
   ];
 };

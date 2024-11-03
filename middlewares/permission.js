@@ -2,10 +2,16 @@ module.exports = function () {
   function handlerPermission(req, res, next) {
     for (var index in req.permission) {
       for (var permissionIndex in req.locals.session.user.role.permissions) {
-        if (req.permission[index] === req.locals.session.user.role.permissions[permissionIndex].permission.permission_name) {
-          req.permission.match = req.locals.session.user.role.permissions[permissionIndex];
+        if (index === req.locals.session.user.role.permissions[permissionIndex].permission.permission_name) {
+          for (var permitIndex in req.permission[index]) {
+            if (req.permission[index][permitIndex] === req.locals.session.user.role.permissions[permissionIndex][permitIndex]) {
+              req.permission.match = {
+                [index]: req.permission[index]
+              };
 
-          return next();
+              return next();
+            }
+          }
         }
       }
     }

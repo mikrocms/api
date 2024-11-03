@@ -1,8 +1,18 @@
 const { query, validationResult } = require('express-validator');
 const mockUser = require('./mock/user');
 
-module.exports = function ({ model }) {
+module.exports = function ({ model, middleware }) {
   const modelUser = model('user');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'USER': {
+        'permit_read': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerListUser(req, res) {
     const errors = validationResult(req);
@@ -20,11 +30,75 @@ module.exports = function ({ model }) {
       'total': 0
     };
 
-    const listUser = await modelUser.list(
-      req.query,
-      req.query.offset,
-      req.query.limit
-    );
+    const queries = {};
+
+    if (req.query.created_at_on) {
+      queries['created_at'] = { 'eq': req.query.created_at_on };
+    }
+
+    if (req.query.created_at_start) {
+      queries['created_at'] = { 'gte': req.query.created_at_start };
+    }
+
+    if (req.query.created_at_end) {
+      queries['created_at'] = { 'lte': req.query.created_at_end };
+    }
+
+    if (req.query.created_by) {
+      queries['created_by'] = { 'eq': req.query.created_by };
+    }
+
+    if (req.query.updated_at_on) {
+      queries['updated_at'] = { 'eq': req.query.updated_at_on };
+    }
+
+    if (req.query.updated_at_start) {
+      queries['updated_at'] = { 'gte': req.query.updated_at_start };
+    }
+
+    if (req.query.updated_at_end) {
+      queries['updated_at'] = { 'lte': req.query.updated_at_end };
+    }
+
+    if (req.query.updated_by) {
+      queries['updated_by'] = { 'eq': req.query.updated_by };
+    }
+
+    if (req.query.deleted_at_on) {
+      queries['deleted_at'] = { 'eq': req.query.deleted_at_on };
+    }
+
+    if (req.query.deleted_at_start) {
+      queries['deleted_at'] = { 'gte': req.query.deleted_at_start };
+    }
+
+    if (req.query.deleted_at_end) {
+      queries['deleted_at'] = { 'lte': req.query.deleted_at_end };
+    }
+
+    if (req.query.deleted_by) {
+      queries['deleted_by'] = { 'eq': req.query.deleted_by };
+    }
+
+    if (req.query.user_email) {
+      queries['user_email'] = { 'like': `%${req.query.user_email}%` };
+    }
+
+    if (req.query.user_username) {
+      queries['user_username'] = { 'like': `%${req.query.user_username}%` };
+    }
+
+    if (req.query.user_fullname) {
+      queries['user_fullname'] = { 'like': `%${req.query.user_fullname}%` };
+    }
+
+    const listUser = await modelUser.find({
+      queries,
+      offset: req.query.offset || null,
+      limit: req.query.limit || null,
+      sort: req.query.sort,
+      method: 'findAndCountAll'
+    });
 
     if (listUser) {
       for (var user of listUser.rows) {
@@ -38,6 +112,8 @@ module.exports = function ({ model }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     query('offset')
       .optional()
       .isNumeric()

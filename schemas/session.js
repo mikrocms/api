@@ -18,7 +18,8 @@ module.exports = function ({ DataTypes }) {
       },
       'session_token': {
         type: DataTypes.STRING({ length: 120 }),
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       'session_device': {
         type: DataTypes.TEXT,

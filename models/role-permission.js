@@ -1,87 +1,22 @@
-const { Op } = require('sequelize');
-
-module.exports = function ({ schema }) {
-  const RoleSchema = schema('role');
-  const RolePermissionSchema = schema('role_permission');
-  const PermissionSchema = schema('permission');
+module.exports = function modelRolePermission({ env, db, schema, model, lib }) {
+  const rolePermissionSchema = schema('role_permission');
+  const roleSchema = schema('role');
+  const permissionSchema = schema('permission');
 
   function migration() {
-    RolePermissionSchema.belongsTo(RoleSchema, {
-      as: 'roled',
-      foreignKey: 'role_id'
-    });
-
-    RolePermissionSchema.belongsTo(PermissionSchema, {
-      as: 'permission',
-      foreignKey: 'permission_id'
-    });
+rolePermissionSchema.belongsTo(roleSchema, {
+  "as": "roled",
+  "foreignKey": "role_id"
+});
+rolePermissionSchema.belongsTo(permissionSchema, {
+  "as": "permission",
+  "foreignKey": "permission_id"
+});
   }
 
-  async function add(rolePermission) {
+  async function add(data) {
     try {
-      return await RolePermissionSchema.create(rolePermission);
-    } catch(err) {
-      console.error(err);
-
-      return null;
-    }
-  }
-
-  async function select(query) {
-    try {
-      const options = {
-        include: [
-          { association: 'roled' },
-          { association: 'permission' }
-        ],
-        where: {}
-      };
-
-      if (query.role_permission_id) {
-        options.where['role_permission_id'] = { [Op.eq]: query.role_permission_id };
-      }
-
-      if (query.role_id) {
-        options.where['role_id'] = { [Op.eq]: query.role_id };
-      }
-
-      if (query.permission_id) {
-        options.where['permission_id'] = { [Op.eq]: query.permission_id };
-      }
-
-      return await RolePermissionSchema.findOne(options);
-    } catch (err) {
-      console.error(err);
-
-      return null;
-    }
-  }
-
-  async function list(query, offset = 0, limit = 10) {
-    try {
-      const options = {
-        include: [
-          { association: 'roled' },
-          { association: 'permission' }
-        ],
-        where: {},
-        order: [
-          ['role_permission_id', query.sort || 'ASC']
-        ]
-      };
-
-      if (query.role_id) {
-        options.where['role_id'] = { [Op.eq]: query.role_id };
-      }
-
-      if (query.permission_id) {
-        options.where['permission_id'] = { [Op.eq]: query.permission_id };
-      }
-
-      if (offset !== null) options.offset = offset;
-      if (limit !== null) options.limit = limit;
-
-      return await RolePermissionSchema.findAndCountAll(options);
+      return await rolePermissionSchema.create(data);
     } catch (err) {
       console.error(err);
 
@@ -91,6 +26,10 @@ module.exports = function ({ schema }) {
 
   async function update(selected, newer) {
     try {
+      selected.permit_create = newer.permit_create || selected.permit_create;
+      selected.permit_read = newer.permit_read || selected.permit_read;
+      selected.permit_update = newer.permit_update || selected.permit_update;
+      selected.permit_delete = newer.permit_delete || selected.permit_delete;
       selected.role_id = newer.role_id || selected.role_id;
       selected.permission_id = newer.permission_id || selected.permission_id;
 
@@ -104,7 +43,7 @@ module.exports = function ({ schema }) {
     }
   }
 
-  async function remove(selected) {
+  async function remove(selected, remover) {
     try {
       await selected.destroy();
 
@@ -116,12 +55,38 @@ module.exports = function ({ schema }) {
     }
   }
 
+  async function find({
+    queries,
+    offset = 0,
+    limit = 10,
+    sort = 'ASC',
+    method = 'findOne'
+  }) {
+    try {
+      const options = {
+        order: [
+          ['role_permission_id', sort]
+        ]
+      };
+
+      if (offset !== null) options.offset = offset;
+      if (limit !== null) options.limit = limit;
+
+      options.where = lib.where(queries);
+
+      return rolePermissionSchema[method](options);
+    } catch (err) {
+      console.error(err);
+
+      return null;
+    }
+  }
+
   return {
     migration,
     add,
-    select,
-    list,
     update,
-    remove
+    remove,
+    find
   };
 };
