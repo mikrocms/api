@@ -7,6 +7,26 @@ module.exports = function ({ DataTypes }) {
         autoIncrement: true,
         primaryKey: true
       },
+      'permit_create': {
+        type: DataTypes.ENUM('ENABLE', 'DISABLE'),
+        allowNull: false,
+        defaultValue: 'DISABLE'
+      },
+      'permit_read': {
+        type: DataTypes.ENUM('ENABLE', 'DISABLE'),
+        allowNull: false,
+        defaultValue: 'DISABLE'
+      },
+      'permit_update': {
+        type: DataTypes.ENUM('ENABLE', 'DISABLE'),
+        allowNull: false,
+        defaultValue: 'DISABLE'
+      },
+      'permit_delete': {
+        type: DataTypes.ENUM('ENABLE', 'DISABLE'),
+        allowNull: false,
+        defaultValue: 'DISABLE'
+      },
       'role_id': {
         type: DataTypes.INTEGER({ length: 3 }).UNSIGNED,
         allowNull: false

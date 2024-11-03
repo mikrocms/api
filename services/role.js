@@ -2,9 +2,19 @@ const { param, validationResult } = require('express-validator');
 const mockRole = require('./mock/role');
 const mockRolePermission = require('./mock/role-permission');
 
-module.exports = function ({ model }) {
+module.exports = function ({ model, middleware }) {
   const modelRole = model('role');
   const modelRolePermission = model('role_permission');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'ROLE': {
+        'permit_read': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerRole(req, res) {
     const errors = validationResult(req);
@@ -22,17 +32,25 @@ module.exports = function ({ model }) {
       'permissions': []
     };
 
-    const selectedRole = await modelRole.select({
-      'role_id': req.params.roleId
+    const selectedRole = await modelRole.find({
+      queries: {
+        'role_id': { 'eq': req.params.roleId }
+      }
     });
 
     if (selectedRole !== null) {
       result.role = mockRole(selectedRole);
     }
 
-    const listPermission = await modelRolePermission.list({
-      'role_id': req.params.roleId
-    }, null, null);
+    const listPermission = await modelRolePermission.find({
+      queries: {
+        'role_id': { 'eq': req.params.roleId }
+      },
+      offset: req.query.offset || null,
+      limit: req.query.limit || null,
+      sort: req.query.sort,
+      method: 'findAndCountAll'
+    });
 
     if (listPermission !== null) {
       for (var permission of listPermission.rows) {
@@ -44,6 +62,8 @@ module.exports = function ({ model }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     param('roleId')
       .exists({ checkFalsy: false })
       .withMessage('mikrocms@api_input_role_id_required')

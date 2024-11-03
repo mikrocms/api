@@ -11,6 +11,7 @@ module.exports = {
   'mikrocms@api_check_email_registered': 'Email already exists. Please choose a different permission.',
   'mikrocms@api_check_username_registered': 'Username already exists. Please choose a different permission.',
   'mikrocms@api_check_user_not_found': 'Could not find the specified user.',
+  'mikrocms@api_access_denied': 'You do not have the required permissions to perform this action.',
 
   // inputs
   'mikrocms@api_input_username_required': 'Username is required. Please enter your username.',
@@ -37,6 +38,10 @@ module.exports = {
   'mikrocms@api_input_permission_id_format': 'Permission id must be numeric.',
   'mikrocms@api_input_role_permission_id_required': 'Role permission id is required. Please enter your role permission id.',
   'mikrocms@api_input_role_permission_id_format': 'Role permission id must be numeric.',
+  'mikrocms@api_input_permission_permit_create_format': 'Role permission permit create hanya boleh ENABLE atau DISABLE',
+  'mikrocms@api_input_permission_permit_read_format': 'Role permission permit read hanya boleh ENABLE atau DISABLE',
+  'mikrocms@api_input_permission_permit_update_format': 'Role permission permit update hanya boleh ENABLE atau DISABLE',
+  'mikrocms@api_input_permission_permit_delete_format': 'Role permission permit delete hanya boleh ENABLE atau DISABLE',
   'mikrocms@api_input_user_email_required': 'Email is required.',
   'mikrocms@api_input_user_email_limit': 'Email length must be between 1 and 64 characters.',
   'mikrocms@api_input_user_username_required': 'Username is required.',

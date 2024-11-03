@@ -4,5 +4,5 @@ module.exports = {
   'role_permission': require('./role-permission'),
   'role': require('./role'),
   'session': require('./session'),
-  'user': require('./user')
+  'user': require('./user'),
 };

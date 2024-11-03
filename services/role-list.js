@@ -1,8 +1,18 @@
 const { query, validationResult } = require('express-validator');
 const mockRole = require('./mock/role');
 
-module.exports = function ({ model }) {
+module.exports = function ({ model, middleware }) {
   const modelRole = model('role');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'ROLE': {
+        'permit_read': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerListRole(req, res) {
     const errors = validationResult(req);
@@ -21,11 +31,71 @@ module.exports = function ({ model }) {
       'total': 0
     };
 
-    const listRole = await modelRole.list(
-      req.query,
-      req.query.offset || null,
-      req.query.limit || null
-    );
+    const queries = {};
+
+    if (req.query.created_at_on) {
+      queries['created_at'] = { 'eq': req.query.created_at_on };
+    }
+
+    if (req.query.created_at_start) {
+      queries['created_at'] = { 'gte': req.query.created_at_start };
+    }
+
+    if (req.query.created_at_end) {
+      queries['created_at'] = { 'lte': req.query.created_at_end };
+    }
+
+    if (req.query.created_by) {
+      queries['created_by'] = { 'eq': req.query.created_by };
+    }
+
+    if (req.query.updated_at_on) {
+      queries['updated_at'] = { 'eq': req.query.updated_at_on };
+    }
+
+    if (req.query.updated_at_start) {
+      queries['updated_at'] = { 'gte': req.query.updated_at_start };
+    }
+
+    if (req.query.updated_at_end) {
+      queries['updated_at'] = { 'lte': req.query.updated_at_end };
+    }
+
+    if (req.query.updated_by) {
+      queries['updated_by'] = { 'eq': req.query.updated_by };
+    }
+
+    if (req.query.deleted_at_on) {
+      queries['deleted_at'] = { 'eq': req.query.deleted_at_on };
+    }
+
+    if (req.query.deleted_at_start) {
+      queries['deleted_at'] = { 'gte': req.query.deleted_at_start };
+    }
+
+    if (req.query.deleted_at_end) {
+      queries['deleted_at'] = { 'lte': req.query.deleted_at_end };
+    }
+
+    if (req.query.deleted_by) {
+      queries['deleted_by'] = { 'eq': req.query.deleted_by };
+    }
+
+    if (req.query.role_name) {
+      queries['role_name'] = { 'like': `%${req.query.role_name}%` };
+    }
+
+    if (req.query.redirect) {
+      queries['redirect'] = { 'like': `%${req.query.redirect}%` };
+    }
+
+    const listRole = await modelRole.find({
+      queries,
+      offset: req.query.offset || null,
+      limit: req.query.limit || null,
+      sort: req.query.sort,
+      method: 'findAndCountAll'
+    });
 
     if (listRole) {
       for (var role of listRole.rows) {
@@ -39,6 +109,8 @@ module.exports = function ({ model }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     query('offset')
       .optional()
       .isNumeric()

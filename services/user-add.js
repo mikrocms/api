@@ -2,12 +2,22 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 
-module.exports = function ({ env, model, locale }) {
+module.exports = function ({ env, model, locale, middleware }) {
   const secret = env['mikrocms@api']?.secret || 'mikrocms';
   const salt = env['mikrocms@api']?.salt || 10;
   const modelUser = model('user');
   const modelRole = model('role');
   const modelActivityLog = model('activity_log');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'USER': {
+        'permit_create': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerAddUser(req, res) {
     const errors = validationResult(req);
@@ -25,16 +35,22 @@ module.exports = function ({ env, model, locale }) {
       'user_id': null
     };
 
-    const registeredEmail = await modelUser.select({
-      'user_email': req.body.email
+    const registeredEmail = await modelUser.find({
+      queries: {
+        'user_email': { 'eq': req.body.email }
+      }
     });
 
-    const registeredUsername = await modelUser.select({
-      'user_username': req.body.username
+    const registeredUsername = await modelUser.find({
+      queries: {
+        'user_username': { 'eq': req.body.username }
+      }
     });
 
-    const selectedRole = await modelRole.select({
-      'role_id': req.body.role_id
+    const selectedRole = await modelRole.find({
+      queries: {
+        'role_id': { 'eq': req.body.role_id }
+      }
     });
 
     if (registeredEmail !== null) {
@@ -88,6 +104,8 @@ module.exports = function ({ env, model, locale }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     body('email')
       .exists({ checkFalsy: true })
       .withMessage('mikrocms@api_input_user_email_required')

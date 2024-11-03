@@ -1,8 +1,18 @@
 const { param, validationResult } = require('express-validator');
 
-module.exports = function ({ model, locale }) {
+module.exports = function ({ model, locale, middleware }) {
   const modelUser = model('user');
   const modelActivityLog = model('activity_log');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'USER': {
+        'permit_delete': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerDeleteUser(req, res) {
     const errors = validationResult(req);
@@ -19,8 +29,10 @@ module.exports = function ({ model, locale }) {
       'message': null
     };
 
-    const selectedUser = await modelUser.select({
-      'user_id': req.params.userId
+    const selectedUser = await modelUser.find({
+      queries: {
+        'user_id': { 'eq': req.params.userId }
+      }
     });
 
     if (selectedUser === null) {
@@ -55,6 +67,8 @@ module.exports = function ({ model, locale }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     param('userId')
       .exists({ checkFalsy: true })
       .withMessage('mikrocms@api_input_user_id_required')

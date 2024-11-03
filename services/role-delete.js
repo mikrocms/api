@@ -1,8 +1,18 @@
 const { param, validationResult } = require('express-validator');
 
-module.exports = function ({ model, locale }) {
+module.exports = function ({ model, locale, middleware }) {
   const modelRole = model('role');
   const modelActivityLog = model('activity_log');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'ROLE': {
+        'permit_delete': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerDeleteRole(req, res) {
     const errors = validationResult(req);
@@ -19,8 +29,10 @@ module.exports = function ({ model, locale }) {
       'message': null
     };
 
-    const selectedRole = await modelRole.select({
-      'role_id': req.params.roleId
+    const selectedRole = await modelRole.find({
+      queries: {
+        'role_id': { 'eq': req.params.roleId }
+      }
     });
 
     if (selectedRole === null) {
@@ -55,6 +67,8 @@ module.exports = function ({ model, locale }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     param('roleId')
       .exists({ checkFalsy: true })
       .withMessage('mikrocms@api_input_role_id_required')

@@ -1,57 +1,12 @@
-const { Op } = require('sequelize');
+module.exports = function modelPermission({ env, db, schema, model, lib }) {
+  const permissionSchema = schema('permission');
 
-module.exports = function ({ schema }) {
-  const PermissionSchema = schema('permission');
-
-  async function add(permission) {
-    try {
-      return await PermissionSchema.create(permission);
-    } catch (err) {
-      console.error(err);
-
-      return null;
-    }
+  function migration() {
   }
 
-  async function select(query) {
+  async function add(data) {
     try {
-      const options = {
-        where: {}
-      };
-
-      if (query.permission_id) {
-        options.where['permission_id'] = { [Op.eq]: query.permission_id };
-      }
-
-      return await PermissionSchema.findOne(options);
-    } catch (err) {
-      console.error(err);
-
-      return null;
-    }
-  }
-
-  async function list(query, offset = 0, limit = 10) {
-    try {
-      const options = {
-        where: {},
-        order: [
-          ['permission_id', query.sort || 'ASC']
-        ]
-      };
-
-      if (query.permission_name) {
-        options.where['permission_name'] = { [Op.like]: `%${query.permission_name}%` };
-      }
-    
-      if (query.permission_description) {
-        options.where['permission_description'] = { [Op.like]: `%${query.permission_description}%` };
-      }
-
-      if (offset !== null) options.offset = offset;
-      if (limit !== null) options.limit = limit;
-
-      return await PermissionSchema.findAndCountAll(options);
+      return await permissionSchema.create(data);
     } catch (err) {
       console.error(err);
 
@@ -74,7 +29,7 @@ module.exports = function ({ schema }) {
     }
   }
 
-  async function remove(selected) {
+  async function remove(selected, remover) {
     try {
       await selected.destroy();
 
@@ -86,11 +41,38 @@ module.exports = function ({ schema }) {
     }
   }
 
+  async function find({
+    queries,
+    offset = 0,
+    limit = 10,
+    sort = 'ASC',
+    method = 'findOne'
+  }) {
+    try {
+      const options = {
+        order: [
+          ['permission_id', sort]
+        ]
+      };
+
+      if (offset !== null) options.offset = offset;
+      if (limit !== null) options.limit = limit;
+
+      options.where = lib.where(queries);
+
+      return permissionSchema[method](options);
+    } catch (err) {
+      console.error(err);
+
+      return null;
+    }
+  }
+
   return {
+    migration,
     add,
-    select,
-    list,
     update,
-    remove
+    remove,
+    find
   };
 };

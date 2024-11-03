@@ -18,8 +18,10 @@ module.exports = function ({ model }) {
       'message': null
     };
 
-    const selectedUser = await modelUser.select({
-      'user_username': req.body.username
+    const selectedUser = await modelUser.find({
+      queries: {
+        'user_username': { 'eq': req.body.username }
+      }
     });
 
     if (selectedUser) {

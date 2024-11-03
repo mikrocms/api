@@ -1,8 +1,18 @@
 const { param, validationResult } = require('express-validator');
 const mockUser = require('./mock/user');
 
-module.exports = function ({ model }) {
+module.exports = function ({ model, middleware }) {
   const modelUser = model('user');
+
+  function setPermission(req, res, next) {
+    req.permission = {
+      'USER': {
+        'permit_read': 'ENABLE'
+      }
+    };
+
+    return next();
+  }
 
   async function handlerUser(req, res) {
     const errors = validationResult(req);
@@ -20,8 +30,10 @@ module.exports = function ({ model }) {
       'user': null
     };
 
-    const selectedUser = await modelUser.select({
-      'user_id': req.params.userId
+    const selectedUser = await modelUser.find({
+      queries: {
+        'user_id': { 'eq': req.params.userId }
+      }
     });
 
     if (selectedUser !== null) {
@@ -32,6 +44,8 @@ module.exports = function ({ model }) {
   }
 
   return [
+    setPermission,
+    middleware(['permission']),
     param('userId')
       .exists({ checkFalsy: false })
       .withMessage('mikrocms@api_input_user_id_required')

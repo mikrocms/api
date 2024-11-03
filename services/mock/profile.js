@@ -20,7 +20,11 @@ module.exports = function (session) {
           'id': permission.role_permission_id,
           'permission_id': permission.permission.permission_id,
           'permission_name': permission.permission.permission_name,
-          'permission_description': permission.permission.permission_description
+          'permission_description': permission.permission.permission_description,
+          'permit_create': permission.permit_create,
+          'permit_read': permission.permit_read,
+          'permit_update': permission.permit_update,
+          'permit_delete': permission.permit_delete
         });
       }
     }
