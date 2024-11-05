@@ -2,7 +2,11 @@ module.exports = function (rolePermission) {
   if (!rolePermission) return null;
 
   const result = {
-    'id': rolePermission.role_permission_id
+    'id': rolePermission.role_permission_id,
+    'permit_create': rolePermission.permit_create,
+    'permit_read': rolePermission.permit_read,
+    'permit_update': rolePermission.permit_update,
+    'permit_delete': rolePermission.permit_delete
   };
 
   if (rolePermission.permission) {

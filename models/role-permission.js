@@ -64,6 +64,11 @@ rolePermissionSchema.belongsTo(permissionSchema, {
   }) {
     try {
       const options = {
+        include: [
+          {
+            "association": "permission"
+          }
+        ],
         order: [
           ['role_permission_id', sort]
         ]
