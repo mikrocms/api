@@ -14,10 +14,5 @@ module.exports = function (user) {
     result.role_name = user.role.role_name;
   }
 
-  if (user.vendor) {
-    result.vendor_name = user.vendor.vendor_name;
-    result.vendor_category = user.vendor.vendor_category;
-  }
-
   return result;
 };
