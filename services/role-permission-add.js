@@ -9,7 +9,7 @@ module.exports = function ({ model, locale, middleware }) {
   function setPermission(req, res, next) {
     req.permission = {
       'PERMISSION': {
-        'permit_add': 'ENABLE'
+        'permit_create': 'ENABLE'
       }
     };
 
