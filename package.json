@@ -1,6 +1,6 @@
 {
   "name": "@mikrocms/api",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Package api mikrocms",
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,8 @@
   },
   "homepage": "https://github.com/mikrocms/api#readme",
   "dependencies": {
-    "@mikrocms/core": "^1.1.1",
-    "@mikrocms/swagger": "^1.0.1",
+    "@mikrocms/core": "^1.2.2",
+    "@mikrocms/swagger": "^1.2.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "express-validator": "^7.1.0",
