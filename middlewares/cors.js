@@ -8,7 +8,7 @@ module.exports = function ({ env, locale }) {
       origin: function (origin, callback) {
         // allow requests with no origin
         // (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+        if (!origin || origin === 'null') return callback(null, true);
 
         if (allowedOrigin.indexOf(origin) === -1) {
           return callback(
